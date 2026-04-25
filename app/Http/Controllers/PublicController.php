@@ -138,6 +138,41 @@ class PublicController extends Controller
         return Response::make($md, 200, ['Content-Type' => 'text/markdown; charset=utf-8']);
     }
 
+    public function sitemap()
+    {
+        $products = Product::where('is_active', true)->get();
+        $articles = CompareArticle::all();
+
+        $urls = [];
+        $urls[] = ['loc' => url('/'), 'changefreq' => 'daily', 'priority' => '1.0'];
+        $urls[] = ['loc' => url('/llms.txt'), 'changefreq' => 'weekly', 'priority' => '0.5'];
+
+        foreach ($products as $p) {
+            $lastmod = $p->last_scraped_at?->toDateString();
+            $urls[] = ['loc' => url("/tool/{$p->slug}"), 'lastmod' => $lastmod, 'changefreq' => 'weekly', 'priority' => '0.8'];
+            $urls[] = ['loc' => url("/tool/{$p->slug}.md"), 'lastmod' => $lastmod, 'changefreq' => 'weekly', 'priority' => '0.7'];
+        }
+        foreach ($articles as $a) {
+            $lastmod = $a->last_regenerated_at->toDateString();
+            $urls[] = ['loc' => url("/compare/{$a->pair_slug}"), 'lastmod' => $lastmod, 'changefreq' => 'weekly', 'priority' => '0.9'];
+            $urls[] = ['loc' => url("/compare/{$a->pair_slug}.md"), 'lastmod' => $lastmod, 'changefreq' => 'weekly', 'priority' => '0.8'];
+        }
+
+        $xml = '<?xml version="1.0" encoding="UTF-8"?>' . "\n";
+        $xml .= '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">' . "\n";
+        foreach ($urls as $u) {
+            $xml .= "  <url>\n";
+            $xml .= '    <loc>' . htmlspecialchars($u['loc']) . "</loc>\n";
+            if (!empty($u['lastmod'])) $xml .= '    <lastmod>' . $u['lastmod'] . "</lastmod>\n";
+            if (!empty($u['changefreq'])) $xml .= '    <changefreq>' . $u['changefreq'] . "</changefreq>\n";
+            if (!empty($u['priority'])) $xml .= '    <priority>' . $u['priority'] . "</priority>\n";
+            $xml .= "  </url>\n";
+        }
+        $xml .= '</urlset>';
+
+        return Response::make($xml, 200, ['Content-Type' => 'application/xml']);
+    }
+
     public function llmsTxt()
     {
         $products = Product::where('is_active', true)->orderBy('name')->get();
