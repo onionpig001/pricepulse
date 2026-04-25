@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>@yield('title', 'PricePulse — Live SaaS Pricing')</title>
     <meta name="description" content="@yield('description', 'Up-to-date SaaS pricing, compared and machine-readable. Updated weekly from vendor pricing pages.')">
+    <meta name="msvalidate.01" content="4D65685A211C2410AA9ABF2F54688498" />
     @stack('head')
     <style>
         :root { --bg:#0b0d10; --fg:#e8eaed; --muted:#8a8f98; --accent:#6ca4ff; --card:#141821; --border:#222834; }
