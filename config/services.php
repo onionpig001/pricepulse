@@ -40,4 +40,9 @@ return [
         'model' => env('CLAUDE_CLI_MODEL', 'claude-sonnet-4-6'),
     ],
 
+    'indexnow' => [
+        'key' => env('INDEXNOW_KEY'),
+        'host' => env('INDEXNOW_HOST', 'pricepulse.onionpig.com'),
+    ],
+
 ];

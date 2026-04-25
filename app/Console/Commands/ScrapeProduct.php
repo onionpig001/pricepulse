@@ -5,6 +5,7 @@ namespace App\Console\Commands;
 use App\Models\PriceSnapshot;
 use App\Models\PricingTier;
 use App\Models\Product;
+use App\Services\IndexNowNotifier;
 use App\Services\PricingExtractor;
 use Illuminate\Console\Command;
 use Throwable;
@@ -90,6 +91,18 @@ class ScrapeProduct extends Command
 
             $product->update(['last_scraped_at' => now()]);
             $this->info("  ✓ {$product->slug}: " . count($parsed['tiers'] ?? []) . ' tiers, ' . count($diff) . ' diffs');
+
+            if (! empty($diff)) {
+                $urls = [
+                    url("/tool/{$product->slug}"),
+                    url("/tool/{$product->slug}.md"),
+                    url('/'),
+                    url('/sitemap.xml'),
+                ];
+                if (IndexNowNotifier::fromConfig()->notify($urls)) {
+                    $this->line('    · indexnow pinged');
+                }
+            }
         } catch (Throwable $e) {
             $this->error("  ✗ {$product->slug}: {$e->getMessage()}");
         }

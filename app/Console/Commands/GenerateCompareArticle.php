@@ -5,6 +5,7 @@ namespace App\Console\Commands;
 use App\Models\CompareArticle;
 use App\Models\Product;
 use App\Services\ArticleGenerator;
+use App\Services\IndexNowNotifier;
 use Illuminate\Console\Command;
 use Throwable;
 
@@ -108,6 +109,16 @@ class GenerateCompareArticle extends Command
 
             $words = str_word_count($parsed['body_md']);
             $this->info("  ✓ {$canonical}: {$words} words");
+
+            $urls = [
+                url("/compare/{$canonical}"),
+                url("/compare/{$canonical}.md"),
+                url('/sitemap.xml'),
+            ];
+            if (IndexNowNotifier::fromConfig()->notify($urls)) {
+                $this->line('    · indexnow pinged');
+            }
+
             return true;
         } catch (Throwable $e) {
             $this->error("  ✗ {$canonical}: {$e->getMessage()}");
