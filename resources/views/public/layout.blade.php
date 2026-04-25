@@ -35,6 +35,14 @@
         footer { margin-top:60px; padding-top:22px; border-top:1px solid var(--border); color:var(--muted); font-size:13px; }
         .cta { display:inline-block; margin-top:10px; padding:8px 14px; border:1px solid var(--border); border-radius:6px; font-size:13px; }
         .cta:hover { border-color:var(--accent); text-decoration:none; }
+        .article { max-width:720px; font-size:15.5px; }
+        .article h2 { font-size:18px; margin-top:28px; padding-top:8px; border-top:1px solid var(--border); }
+        .article h3 { font-size:16px; }
+        .article p { margin:10px 0; color:#cfd3d9; }
+        .article ul { padding-left:22px; }
+        .article li { margin:6px 0; color:#cfd3d9; }
+        .article table { margin:14px 0; }
+        .article code { background:#1e2630; padding:1px 6px; border-radius:4px; font-size:13px; }
     </style>
 </head>
 <body>

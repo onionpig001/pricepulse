@@ -34,8 +34,11 @@ class ScrapeProduct extends Command
             return self::FAILURE;
         }
 
-        foreach ($products as $product) {
+        foreach ($products as $i => $product) {
             $this->runOne($product);
+            if ($products->count() > 1 && $i < $products->count() - 1) {
+                sleep(8);
+            }
         }
 
         return self::SUCCESS;

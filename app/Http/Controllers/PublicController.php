@@ -3,10 +3,12 @@
 namespace App\Http\Controllers;
 
 use App\Models\Category;
+use App\Models\CompareArticle;
 use App\Models\PriceSnapshot;
 use App\Models\Product;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Response;
+use Illuminate\Support\Str;
 
 class PublicController extends Controller
 {
@@ -96,6 +98,12 @@ class PublicController extends Controller
             abort(404);
         }
 
+        sort($slugs);
+        $canonical = implode('-vs-', $slugs);
+        if ($pair !== $canonical) {
+            return redirect("/compare/{$canonical}", 301);
+        }
+
         $matrix = [];
         foreach ($products as $p) {
             $latest = $p->latestSnapshot();
@@ -103,7 +111,31 @@ class PublicController extends Controller
             $matrix[$p->slug] = ['product' => $p, 'tiers' => $tiers];
         }
 
-        return view('public.compare', compact('products', 'matrix', 'pair'));
+        $article = CompareArticle::where('pair_slug', $canonical)->first();
+        $articleHtml = $article ? Str::markdown($article->body_md) : null;
+
+        return view('public.compare', compact('products', 'matrix', 'pair', 'article', 'articleHtml'));
+    }
+
+    public function compareMarkdown(string $pair)
+    {
+        $slugs = array_filter(explode('-vs-', $pair));
+        sort($slugs);
+        $canonical = implode('-vs-', $slugs);
+        $article = CompareArticle::where('pair_slug', $canonical)->first();
+        if (! $article) {
+            abort(404);
+        }
+
+        $md = "---\n";
+        $md .= "title: " . $article->title . "\n";
+        $md .= "tldr: " . ($article->tldr ?? '') . "\n";
+        $md .= "last_updated: " . $article->last_regenerated_at->toDateString() . "\n";
+        $md .= "source: " . url("/compare/{$canonical}") . "\n";
+        $md .= "---\n\n";
+        $md .= $article->body_md;
+
+        return Response::make($md, 200, ['Content-Type' => 'text/markdown; charset=utf-8']);
     }
 
     public function llmsTxt()
